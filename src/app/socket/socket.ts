@@ -1,10 +1,13 @@
-import { createServer, Server } from "node:http";
-import app from "../../App";
+import { Server } from "socket.io";
+import orderHandler from "./order/orderHandler";
 
 const handleSocket = (server: any) => {
-  const io = new Server(server);
+  const io = new Server(server,{cors:{origin:"*",methods:["GET","POST"]}});
   io.on("connection successfully", (socket) => {
-    console.log(`socket connected ${socket.id}`);
+      console.log(`socket connected ${socket.id}`);
+      
+      // Order handler : place order
+      orderHandler(io,socket)
   });
 };
 
