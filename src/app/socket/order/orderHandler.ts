@@ -6,9 +6,11 @@ const orderHandler = (io:any, socket:any) => {
         try {
             console.log('place order id', socket.id)
             const validate = validator(data)
+         
             if (!validate.isValid) {
              callback({success:false,message:validate.message})
             }
+
         } catch (error) {
             console.log(error)
         }

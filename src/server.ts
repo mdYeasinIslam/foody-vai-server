@@ -7,12 +7,12 @@ import connectDB from "./app/config/database";
 dotenv.config();
 let server = http.createServer(app);
 const PORT = 5000;
-handleSocket(server)
+
+handleSocket(server);
+
 async function main() {
- await connectDB();
-  server.listen(PORT, () =>
-    console.log(`Server is running on port ${PORT}`),
-  );
+  await connectDB();
+  server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 }
 
 main().catch((err) => {
