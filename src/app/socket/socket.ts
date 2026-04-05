@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import orderHandler from "./order/orderHandler";
-import { generateId } from "../utils/_helper";
+import { calculateTotal, generateId } from "../utils/_helper";
 
 const handleSocket = (server: any) => {
   const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
@@ -9,8 +9,8 @@ const handleSocket = (server: any) => {
       console.log(`socket connected ${socket.id}`);
       socket.emit('connection',{success:true,message:"Socket connected successfully"})
     // Order handler : place order
-       generateId();
        console.log(generateId());
+       console.log(calculateTotal([{quantity:1,price:100}]));
       orderHandler(io,socket)
   });
 };

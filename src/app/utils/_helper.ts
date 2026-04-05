@@ -18,3 +18,20 @@ export const generateId = () => {
 
   return `ORD-${year}${month}${day}-${random}`;
 };
+
+export const calculateTotal = (items: any[]) => {
+  const subTotal = items.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
+  const tax = subTotal * 0.10;
+  const delivery = 50;
+  const total = subTotal + tax + delivery;
+
+  return {
+    subTotal,
+    tax,
+    delivery,
+    total,
+  };
+};
