@@ -6,6 +6,7 @@ export const validator = (data: any) => {
   return { isValid: true, message: "" };
 };
 
+//generate Id
 export const generateId = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -19,6 +20,7 @@ export const generateId = () => {
   return `ORD-${year}${month}${day}-${random}`;
 };
 
+//calculate total amount
 export const calculateTotal = (items: any[]) => {
   const subTotal = items.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -32,6 +34,32 @@ export const calculateTotal = (items: any[]) => {
     subTotal,
     tax,
     delivery,
-    total,
+    totalAmount: total,
+  };
+};
+
+// create order document
+export const createOrderDocument = (orderData: any, orderId: string, totals: any) => {
+  return {
+    customerPhone: orderData.customerPhone?.trim(),
+    customerAddress: orderData.customerAddress?.trim(),
+    items: orderData.items,
+    subtotal: totals.subTotal,
+    tax: totals.tax,
+    deliveryFee: totals.delivery,
+    totalAmount: totals.totalAmount,
+    specialNotes: orderData.specialNotes || '',
+    paymentMethod: orderData.paymentMethod || 'cash',
+    paymentStatus: 'pending',
+    status: 'pending',
+    statusHistory: [{
+      status: 'pending',
+      timestamp: new Date(),
+      by: 'customer',
+      note: 'Order placed'
+    }],
+    estimatedTime: null,
+    createdAt: new Date(),
+    updatedAt: new Date()
   };
 };
