@@ -8,9 +8,6 @@ const handleSocket = (server: any) => {
   io.on("connection", (socket) => {
       console.log(`socket connected ${socket.id}`);
       socket.emit('connection',{success:true,message:"Socket connected successfully"})
-    // Order handler : place order
-       console.log(generateId());
-       console.log(calculateTotal([{quantity:1,price:100}]));
       orderHandler(io,socket)
   });
 };
