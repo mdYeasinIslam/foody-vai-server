@@ -32,5 +32,18 @@ const orderHandler = (io:any, socket:any) => {
             callback({success:false,message:"Something went wrong",error:error})
         }
     })
+    socket.on('trackOder', async (data:any, callback:any) => {
+        try {
+            const order = await Order.findById(data?.orderId)
+            if (!order) {
+                return callback({ success: false, message: "Order not found" })
+            }
+            socket.join(`order-${data?.orderId}`)
+            callback({ success: true, message: "Order tracked successfully", order })
+
+        } catch (error) {
+            callback({ success: false, message: "Something went wrong", error: error })
+        }
+    })
 }
 export default orderHandler;
