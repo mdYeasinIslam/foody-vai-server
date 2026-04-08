@@ -122,5 +122,23 @@ const orderHandler = (io: any, socket: any) => {
       });
     }
   });
+
+  socket.on("adminLogin", async (data: any, callback: any) => {
+    try {
+      if (data.password === process.env.ADMIN_PASSWORD) {
+        socket.isAdmin = true;
+        socket.join('admins')
+        callback({ success: true, message: "Login successful" });
+      } else {
+        callback({ success: false, message: "Invalid password" });
+      }
+    } catch (error) {
+      callback({
+        success: true,
+        message: "Something went wrong",
+        error: "error",
+      });
+    }
+  });
 };
 export default orderHandler;
