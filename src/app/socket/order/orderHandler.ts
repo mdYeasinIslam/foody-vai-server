@@ -3,6 +3,7 @@ import {
   calculateTotal,
   createOrderDocument,
   generateId,
+  isValidStatusTransition,
   validator,
 } from "../../utils/_helper";
 
@@ -52,6 +53,8 @@ const orderHandler = (io: any, socket: any) => {
       socket.join(`order-${data?.orderId}`);
       callback({ success: true, message: "Order tracked successfully", order });
     } catch (error) {
+      console.log(error);
+
       callback({
         success: false,
         message: "Something went wrong",
@@ -65,10 +68,13 @@ const orderHandler = (io: any, socket: any) => {
     try {
       const order = await Order.findOne({ orderId: data?.orderId });
       if (!order) {
-        callback({ success: false, message: "Order not found" });
+        return callback({ success: false, message: "Order not found" });
       }
       if (!["pending", "confirmed"]?.includes(order?.status || "")) {
-        callback({ success: false, message: "Order cannot be cancelled" });
+        return callback({
+          success: false,
+          message: "Order cannot be cancelled",
+        });
       }
 
       await Order.updateOne(
@@ -94,6 +100,7 @@ const orderHandler = (io: any, socket: any) => {
       io.to("admin").emit("orderCancelled", { orderId: data.orderId });
       callback({ success: true, message: "Order cancelled successfully" });
     } catch (error) {
+      console.log(error);
       callback({
         success: false,
         message: "Something went wrong",
@@ -115,6 +122,8 @@ const orderHandler = (io: any, socket: any) => {
 
       callback({ success: true, message: "Order found successfully", orders });
     } catch (error) {
+      console.log(error);
+
       callback({
         success: false,
         message: "Something went wrong",
@@ -123,22 +132,90 @@ const orderHandler = (io: any, socket: any) => {
     }
   });
 
+  //admin login
   socket.on("adminLogin", async (data: any, callback: any) => {
     try {
       if (data.password === process.env.ADMIN_PASSWORD) {
         socket.isAdmin = true;
-        socket.join('admins')
+        socket.join("admins");
         callback({ success: true, message: "Login successful" });
       } else {
         callback({ success: false, message: "Invalid password" });
       }
     } catch (error) {
+      console.log(error);
+
       callback({
         success: true,
         message: "Something went wrong",
-        error: "error",
+        error: error,
       });
     }
   });
+
+  //get all order for admin
+  socket.on("getAllOrders", async (data: any, callback: any) => {
+    try {
+      if (!socket.isAdmin) {
+        return callback({ success: false, message: "Unauthorized" });
+      }
+      const filter = data?.status ? { status: data?.status } : {};
+      const getAllOrders = await Order.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(20);
+      callback({
+        success: true,
+        message: "Orders fetched successfully",
+        orders: getAllOrders,
+      });
+    } catch (error) {
+      console.log(error);
+      callback({
+        success: false,
+        message: "Something went wrong",
+        error: error,
+      });
+    }
+  });
+
+  //update order status
+  socket.on("updateOrderStatus", async (data: any, callback: any) => {
+    try {
+      const order = await Order.findOne({ orderId: data?.orderId });
+      if (!order) {
+        return callback({ success: false, message: "Order not found" })
+      }
+      if (!isValidStatusTransition(order.status, data.newStatus)) {
+        return callback({ success: false, message: "Invalid status transition" })
+      }
+
+      const updateOrder = await Order.updateOne(
+        { orderId: data?.orderId },
+        {
+          $set: {
+            status: data.newStatus,
+            updatedAt: new Date(),
+          },
+          $push: {
+            statusHistory: {
+              status: data.newStatus,
+              timestamp: new Date(),
+              by: socket.id,
+              note: data.note || "Order status updated by admin",
+            },
+          },
+        },
+      );
+      io.to(`order-${data?.orderId}`).emit("statusUpdated", {
+        orderId: data.orderId,
+        updateOrder, status: data.newStatus
+      });
+      socket.io('admin').emit('orderStatusChanged', { orderId: data.orderId, status: data.newStatus })
+      callback({ success: true, message: "Order status updated successfully", result:updateOrder})
+    } catch (error) {
+      console.log(error)
+      callback({success:false,message:"Something went wrong",error:error})
+    }
+  })
 };
 export default orderHandler;

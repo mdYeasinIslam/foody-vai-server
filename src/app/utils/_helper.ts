@@ -68,7 +68,7 @@ export const isValidStatusTransition = (currentStatus: string, newStatus: string
   const statusTransitions: { [key: string]: string[] } = {
     pending: ["confirmed", "cancelled"],
     confirmed: ["preparing", "cancelled"],
-    preparing: ["ready", "out_for_delivery", "cancelled"],
+    preparing: ["ready", "cancelled"],
     ready: ["out_for_delivery", "cancelled"],
     out_for_delivery: ["delivered"],
     delivered: [],
