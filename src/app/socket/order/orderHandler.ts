@@ -183,10 +183,13 @@ const orderHandler = (io: any, socket: any) => {
     try {
       const order = await Order.findOne({ orderId: data?.orderId });
       if (!order) {
-        return callback({ success: false, message: "Order not found" })
+        return callback({ success: false, message: "Order not found" });
       }
       if (!isValidStatusTransition(order.status, data.newStatus)) {
-        return callback({ success: false, message: "Invalid status transition" })
+        return callback({
+          success: false,
+          message: "Invalid status transition",
+        });
       }
 
       const updateOrder = await Order.updateOne(
@@ -208,14 +211,134 @@ const orderHandler = (io: any, socket: any) => {
       );
       io.to(`order-${data?.orderId}`).emit("statusUpdated", {
         orderId: data.orderId,
-        updateOrder, status: data.newStatus
+        updateOrder,
+        status: data.newStatus,
       });
-      socket.io('admin').emit('orderStatusChanged', { orderId: data.orderId, status: data.newStatus })
-      callback({ success: true, message: "Order status updated successfully", result:updateOrder})
+      socket.io("admin").emit("orderStatusChanged", {
+        orderId: data.orderId,
+        status: data.newStatus,
+      });
+      callback({
+        success: true,
+        message: "Order status updated successfully",
+        result: updateOrder,
+      });
     } catch (error) {
-      console.log(error)
-      callback({success:false,message:"Something went wrong",error:error})
+      console.log(error);
+      callback({
+        success: false,
+        message: "Something went wrong",
+        error: error,
+      });
     }
-  })
+  });
+
+  //accept order
+  socket.on("acceptOrder", async (data: any, callback: any) => {
+    try {
+      if (!socket.isAdmin) {
+        return callback({ success: false, message: "Unauthorized" });
+      }
+      const order = await Order.findOne({ orderId: data.orderId });
+
+      if (!order || order.status !== "pending") {
+        return callback({
+          success: false,
+          message: "Can't accept this order",
+        });
+      }
+      const estimatedTime = data.estimatedTime || 30;
+      const result = await Order.updateOne(
+        { orderId: data.orderId },
+        {
+          $set: {
+            status: "confirmed",
+            estimatedTime,
+            updatedAt: new Date(),
+          },
+          $push: {
+            statusHistory: {
+              status: "confirmed",
+              Timestamp: new Date(),
+              by: socket.id,
+              note: `Order confirmed by admin with estimated time of ${estimatedTime} minutes`,
+            },
+          },
+        },
+      );
+      io.to(`order-${data.orderId}`).emit("orderConfirmed", {
+        orderId: data.orderId,
+        estimatedTime,
+      });
+      socket
+        .to("admin")
+        .emit("orderConfirmedByAdmin", { orderId: data.orderId });
+      callback({
+        success: true,
+        message: "Order confirmed successfully",
+        result,
+      });
+    } catch (error) {
+      console.log(error);
+      callback({
+        success: false,
+        message: "Something went wrong",
+        error: error,
+      });
+    }
+  });
+
+  //reject order
+  socket.on("rejectOrder", async (data: any, callback: any) => {
+    try {
+      if (!socket.isAdmin) {
+        return callback({ success: false, message: "Unauthorized" });
+      }
+      const order = await Order.findOne({ orderId: data.orderId });
+      if (!order || order.status !== "pending") {
+        return callback({
+          success: false,
+          message: "Can't reject this order",
+        });
+      }
+      const result = await Order.updateOne(
+        { orderId: data.orderId },
+        {
+          $set: {
+            status: "rejected",
+            updatedAt: new Date(),
+          },
+          $push: {
+            statusHistory: {
+              status: "rejected",
+              timestamp: new Date(),
+              by: socket.id,
+              note: data.reason || "Order rejected by admin",
+            },
+          },
+        },
+      )
+      io.to(`order-${data.orderId}`).emit("orderRejected", {
+        orderId: data.orderId,
+      });
+      socket
+        .to("admin")
+        .emit("orderRejectedByAdmin", { orderId: data.orderId });
+      callback({
+        success: true,
+        message: "Order rejected successfully",
+        result,
+      });
+
+
+    } catch (error) {
+      console.log(error);
+      callback({
+        success: false,
+        message: "Something went wrong",
+        error: error,
+      });
+    }
+  });
 };
 export default orderHandler;
