@@ -317,7 +317,7 @@ const orderHandler = (io: any, socket: any) => {
             },
           },
         },
-      )
+      );
       io.to(`order-${data.orderId}`).emit("orderRejected", {
         orderId: data.orderId,
       });
@@ -329,8 +329,6 @@ const orderHandler = (io: any, socket: any) => {
         message: "Order rejected successfully",
         result,
       });
-
-
     } catch (error) {
       console.log(error);
       callback({
@@ -340,5 +338,64 @@ const orderHandler = (io: any, socket: any) => {
       });
     }
   });
+
+  //get live stats
+  socket.on('getLiveStats', async (data: any, callback: any) => {
+    try {
+      if (!socket.isAdmin) {
+        return callback({
+          success: false,
+          message: 'Unauthorized',
+        })
+      }
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const stats = {
+        totalOrder: await Order.countDocuments({ createdAt: { $gte: today } }),
+        pendingOrder: await Order.countDocuments({
+          status: "pending",
+          createdAt: { $gte: today },
+        }),
+        confirmedOrder: await Order.countDocuments({
+          status: "confirmed",
+          createdAt: { $gte: today },
+        }),
+        cancelledOrder: await Order.countDocuments({
+          status: "cancelled",
+          createdAt: { $gte: today },
+        }),
+        preparingOrder: await Order.countDocuments({
+          status: "preparing",
+          createdAt: { $gte: today },
+        }),
+        readyOrder: await Order.countDocuments({
+          status: "ready",
+          createdAt: { $gte: today },
+        }),
+        deliveredOrder: await Order.countDocuments({
+          status: "delivered",
+          createdAt: { $gte: today },
+        }),
+        out_for_delivery: await Order.countDocuments({
+          status: "out_for_delivery",
+          createdAt: { $gte: today },
+        }),
+
+      };
+      callback({
+        success: true,
+        message: 'Stats fetched successfully',
+        stats
+      })
+    } catch (error) {
+      console.error(error)
+      callback({
+        success: false,
+        message: 'Something went wrong',
+        error: error
+      })
+    }
+  })
 };
 export default orderHandler;
