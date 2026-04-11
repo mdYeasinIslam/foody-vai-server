@@ -397,5 +397,14 @@ const orderHandler = (io: any, socket: any) => {
       })
     }
   })
+
+  //disconnect
+
+  socket.on('disconnect', () => {
+    console.log(`socket disconnected ${socket.id}`);
+    if (socket.isAdmin) {
+      socket.to('admin').emit('adminDisconnected',{adminId:socket.id})
+    }
+  })
 };
 export default orderHandler;
