@@ -137,7 +137,7 @@ const orderHandler = (io: any, socket: any) => {
     try {
       if (data.password === process.env.ADMIN_PASSWORD) {
         socket.isAdmin = true;
-        socket.join("admins");
+        socket.join("admin");
         callback({ success: true, message: "Login successful" });
       } else {
         callback({ success: false, message: "Invalid password" });

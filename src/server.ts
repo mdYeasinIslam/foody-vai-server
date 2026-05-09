@@ -1,9 +1,8 @@
+import dotenv from "dotenv";
 import http from "http";
 import app from "./App";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import handleSocket from "./app/socket/socket";
 import connectDB from "./app/config/database";
+import handleSocket from "./app/socket/socket";
 dotenv.config();
 let server = http.createServer(app);
 const PORT = 5000;

@@ -9,7 +9,7 @@ const handleSocket = (server: any) => {
     console.log(`socket connected ${socket.id}`);
     socket.emit("connected", {
       success: true,
-      message: "Socket connected successfully",
+      message: "Welcome to FoodyVai",
     });
     orderHandler(io, socket);
   });
