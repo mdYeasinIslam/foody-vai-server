@@ -9,7 +9,6 @@ const addressSchema = new Schema({
   },
   districtName: {
     type: String,
-    required: true,
     trim: true,
   },
   areaId: {

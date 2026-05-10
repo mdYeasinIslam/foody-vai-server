@@ -1,20 +1,22 @@
 import express, { Request, Response } from "express";
 import AddressModel from "./address.model";
 import z from "zod";
+
+
 export const addressRoute = express.Router();
 
-const addressZod = z.object({
+const AddressZod = z.object({
   districtId: z.string(),
-  districtName: z.string().optional(),
+  districtName: z.string().nullable(),
   areaId: z.string(),
-  areaName: z.string().optional(),
+  areaName: z.string().nullable(),
   contactName: z.string(),
   phone: z.string(),
   addressName: z.string(),
 });
 
-addressRoute.post("/customer-address", async (req: Request, res: Response) => {
-  const body =addressZod.parseAsync(req.body);
+addressRoute.post("/", async (req: Request, res: Response) => {
+  const body = await AddressZod.parseAsync(req.body);
   const address = await AddressModel.create(body);
   console.log(address);
   res.status(201).json({
@@ -23,6 +25,24 @@ addressRoute.post("/customer-address", async (req: Request, res: Response) => {
     data: address,
   });
 });
+addressRoute.get('/', async (req: Request, res: Response) => {
+  try {
+    const address = await AddressModel.find();
+  res.status(201).json({
+    success: true,
+    message: "Address is fetched successfully",
+    data: address,
+  });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
+  }
+  
+})
 // export const foodRoute = express.Router();
 
 // foodRoute.post("/add-food", async (req: Request, res: Response) => {
