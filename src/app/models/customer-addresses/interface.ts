@@ -6,4 +6,5 @@ export interface IAddress {
   contactName: string;
   phone: string;
   addressName: string;
+  address: string;
 }

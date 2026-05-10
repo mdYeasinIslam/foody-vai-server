@@ -7,12 +7,13 @@ export const addressRoute = express.Router();
 
 const AddressZod = z.object({
   districtId: z.string(),
-  districtName: z.string().nullable(),
+  // districtName: z.string().nullable(),
   areaId: z.string(),
-  areaName: z.string().nullable(),
+  // areaName: z.string().nullable(),
   contactName: z.string(),
   phone: z.string(),
   addressName: z.string(),
+  address: z.string(),
 });
 
 addressRoute.post("/", async (req: Request, res: Response) => {
