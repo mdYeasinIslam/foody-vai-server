@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 export const cartRoute = express.Router();
 
 const zodCheck = z.object({
+  productId: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   price: z.object({
@@ -21,28 +22,43 @@ const zodCheck = z.object({
 
 cartRoute.post("/add-product", async (req, res) => {
   try {
-    const id = req.body._id;
     const body = zodCheck.parse(req.body);
-    const findProduct = await CartModel.findOne(id).exec();
-    if (findProduct) {
-      const quantity = findProduct.quantity + body.quantity;
-      const saveData = await CartModel.findOneAndUpdate(id, {
-        quantity: quantity,
-      });
-      res.status(201).json({
-        success: true,
-        message: "Item already exit in DB. SO, Quantity updated successfully",
-        data: saveData,
-      });
-    } else {
-      console.log('else')
-      const saveData = await CartModel.create(body);
-      res.status(201).json({
-        success: true,
-        message: "An item added to cart successfully",
-        data: saveData,
+    const existing = await CartModel.findOne({
+      productId: body.productId,
+    });
+    if (existing) {
+      // Already in DB
+      return res.status(409).json({
+        success: false,
+        message: "Item already in cart. Use PATCH to update quantity.",
+        cartItemId: existing._id,
       });
     }
+    const savedData = await CartModel.create({ ...body, quantity: 1 });
+    res.status(201).json({
+      success: true,
+      message: "An item added to cart successfully",
+      data: savedData,
+    });
+    // if (findProduct) {
+    //   const quantity = findProduct.quantity + body.quantity;
+    //   const saveData = await CartModel.findOneAndUpdate(id, {
+    //     quantity: quantity,
+    //   });
+    //   res.status(201).json({
+    //     success: true,
+    //     message: "Item already exit in DB. SO, Quantity updated successfully",
+    //     data: saveData,
+    //   });
+    // } else {
+    //   console.log('else')
+    //   const saveData = await CartModel.create(body);
+    //   res.status(201).json({
+    //     success: true,
+    //     message: "An item added to cart successfully",
+    //     data: saveData,
+    //   });
+    // }
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -54,7 +70,7 @@ cartRoute.post("/add-product", async (req, res) => {
 });
 cartRoute.get("/", async (req, res) => {
   try {
-    const cartProducts = await CartModel.find();
+    const cartProducts = await CartModel.find().sort({ createdAt: -1 });
     res.status(201).json({
       success: true,
       message: "All cart data are fetched successfully",
@@ -109,22 +125,38 @@ cartRoute.delete("/:id", async (req, res) => {
   }
 });
 
-cartRoute.patch("/:id", async (req, res) => {
+cartRoute.patch("/:id/quantity", async (req, res) => {
   try {
     const id = req.params.id;
-    const body = req.body;
-    const updateData = await CartModel.findByIdAndUpdate(id, body);
+    const { action } = req.body; // "increment" | "decrement"
+    const delta = action === "increment" ? 1 : -1;
+
+    const updatedData = await CartModel.findByIdAndUpdate(
+      id,
+      { $inc: { quantity: delta } },
+      { new: true },
+    );
+    if (!updatedData)
+      return res
+        .status(404)
+        .json({ success: false, message: "Cart item not found" });
+
+    // auto-delete if quantity drops to 0
+    if (updatedData.quantity <= 0) {
+      await CartModel.findByIdAndDelete(id);
+      return res.status(200).json({ success: true, data: null, deleted: true });
+    }
     res.status(201).json({
       success: true,
       message: "Item updated successfully",
-      data: updateData,
-    })
+      data: updatedData,
+    });
   } catch (error) {
-     console.log(error);
-     res.status(500).json({
-       success: false,
-       message: "Something went wrong",
-       error: error,
-     });
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
   }
-})
+});
