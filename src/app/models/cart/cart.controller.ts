@@ -1,25 +1,24 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import z from "zod";
-import ProductModel from "./product.model";
-
-export const productRoute = express.Router();
+import CartModel from "./cart.model";
+export const cartRoute = express.Router();
 
 const zodCheck = z.object({
   name: z.string(),
   description: z.string().nullable(),
-  prices: z.array(z.object({
-    weight: z.number(),
-    price: z.number(),
-    originalPrice: z.number(),
-  })),
+  price: z.number(),
+  weight: z.number(),
+  originalPrice: z.number(),
   category: z.string(),
-  subCategory: z.string().nullable(),
+  quantity: z.number(),
   img: z.string(),
 });
-productRoute.post("/add-product", async (req: Request, res: Response) => {
+
+cartRoute.post("/add-product", async (req, res) => {
   try {
     const body = zodCheck.parse(req.body);
-    const saveData = await ProductModel.create(body);
+    console.log(body);
+    const saveData = await CartModel.create(body);
     res.status(201).json({
       success: true,
       message: "",
@@ -34,15 +33,14 @@ productRoute.post("/add-product", async (req: Request, res: Response) => {
     });
   }
 });
-
-productRoute.get("/", async (req: Request, res: Response) => {
+cartRoute.get("/", async (req, res) => {
   try {
-    const products = await ProductModel.find();
+    const cartProducts = await CartModel.find();
     res.status(201).json({
       success: true,
       message: "",
-      data: products,
-      count: products.length,
+      data: cartProducts,
+      count: cartProducts.length,
     });
   } catch (error) {
     console.log(error);
@@ -53,3 +51,4 @@ productRoute.get("/", async (req: Request, res: Response) => {
     });
   }
 });
+

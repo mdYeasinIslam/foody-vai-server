@@ -1,22 +1,6 @@
 import { model, Schema } from "mongoose";
-const priceSchema = new Schema(
-  {
-    weight: {
-      type: Number,
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
-    originalPrice: {
-      type: Number,
-      required: true,
-    },
-  },
-  { _id: false },
-);
-const productSchema = new Schema(
+
+const cartSchema = new Schema(
   {
     name: {
       type: String,
@@ -27,7 +11,19 @@ const productSchema = new Schema(
       type: String,
       trim: true,
     },
-    prices: { type: [priceSchema], required: true },
+
+    price: {
+      type: Number,
+      required: true,
+    },
+    originalPrice: {
+      type: Number,
+      required: true,
+    },
+    weight: {
+      type: Number,
+      required: true,
+    },
     category: {
       type: String,
       required: true,
@@ -36,6 +32,10 @@ const productSchema = new Schema(
     subCategory: {
       type: String,
       trim: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
     },
     img: {
       type: String,
@@ -46,5 +46,5 @@ const productSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-const ProductModel = model("Product", productSchema);
-export default ProductModel;
+const CartModel = model("Cart", cartSchema);
+export default CartModel;
