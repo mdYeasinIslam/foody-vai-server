@@ -11,6 +11,8 @@ const zodCheck = z.object({
     weight: z.number(),
     price: z.number(),
     originalPrice: z.number(),
+    weightName:z.string(),
+    currency:z.string()
   })),
   category: z.string(),
   subCategory: z.string().nullable(),

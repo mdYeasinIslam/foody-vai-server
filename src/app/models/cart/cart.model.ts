@@ -1,5 +1,29 @@
 import { model, Schema } from "mongoose";
-
+const priceSchema = new Schema(
+  {
+    weight: {
+      type: Number,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    originalPrice: {
+      type: Number,
+      required: true,
+    },
+    weightName: {
+      type: String,
+      required: true,
+    },
+    currency: {
+      type: String,
+      required: true,
+    },
+  },
+  { _id: false },
+);
 const cartSchema = new Schema(
   {
     name: {
@@ -12,18 +36,7 @@ const cartSchema = new Schema(
       trim: true,
     },
 
-    price: {
-      type: Number,
-      required: true,
-    },
-    originalPrice: {
-      type: Number,
-      required: true,
-    },
-    weight: {
-      type: Number,
-      required: true,
-    },
+    price: { type: priceSchema, required: true },
     category: {
       type: String,
       required: true,

@@ -13,6 +13,14 @@ const priceSchema = new Schema(
       type: Number,
       required: true,
     },
+    weightName: {
+      type: String,
+      required: true,
+    },
+    currency: {
+      type: String,
+      required: true,
+    },
   },
   { _id: false },
 );
