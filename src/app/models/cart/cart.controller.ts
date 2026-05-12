@@ -118,11 +118,11 @@ cartRoute.delete("/:id", async (req, res) => {
 cartRoute.patch("/:id/quantity", async (req, res) => {
   try {
     const id = req.params.id;
-    const { action } = req.body; // "increment" | "decrement"
+    const { action,productId } = req.body; // "increment" | "decrement"
     const delta = action === "increment" ? 1 : -1;
 
-    const updatedData = await CartModel.findByIdAndUpdate(
-      id,
+    const updatedData = await CartModel.findOneAndUpdate(
+      { productId },
       { $inc: { quantity: delta } },
       { new: true },
     );
