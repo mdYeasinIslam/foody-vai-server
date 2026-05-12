@@ -33,8 +33,8 @@ cartRoute.post("/add-product", async (req, res) => {
         { $inc: { quantity: 1 } },
         { new: true },
       );
-      
-     return res.status(201).json({
+
+      return res.status(201).json({
         success: true,
         data: updatedData,
         alreadyExist: true,
@@ -45,7 +45,7 @@ cartRoute.post("/add-product", async (req, res) => {
     const savedData = await CartModel.create({ ...body, quantity: 1 });
     res.status(201).json({
       success: true,
-      alreadyExist:false,
+      alreadyExist: false,
       message: "An item added to cart successfully",
       data: savedData,
     });
@@ -115,10 +115,27 @@ cartRoute.delete("/:id", async (req, res) => {
   }
 });
 
+cartRoute.delete("/", async (req, res) => {
+  try {
+    const deleteData = await CartModel.deleteMany({});
+    res.status(201).json({
+      success: true,
+      message: "All items deleted successfully",
+      data: deleteData,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
+  }
+});
+
 cartRoute.patch("/:id/quantity", async (req, res) => {
   try {
-    const id = req.params.id;
-    const { action,productId } = req.body; // "increment" | "decrement"
+    const { action, productId } = req.body; // "increment" | "decrement"
     const delta = action === "increment" ? 1 : -1;
 
     const updatedData = await CartModel.findOneAndUpdate(
@@ -126,6 +143,7 @@ cartRoute.patch("/:id/quantity", async (req, res) => {
       { $inc: { quantity: delta } },
       { new: true },
     );
+    console.log(updatedData)
     if (!updatedData)
       return res
         .status(404)
@@ -133,8 +151,8 @@ cartRoute.patch("/:id/quantity", async (req, res) => {
 
     // auto-delete if quantity drops to 0
     if (updatedData.quantity <= 0) {
-      await CartModel.findByIdAndDelete(id);
-      return res.status(200).json({ success: true, data: null, deleted: true });
+      await CartModel.findOneAndDelete(productId);
+      return res.status(200).json({ success: true, data: null, deleted: true,cartItemId:updatedData._id });
     }
     res.status(201).json({
       success: true,
