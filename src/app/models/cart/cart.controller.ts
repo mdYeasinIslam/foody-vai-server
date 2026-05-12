@@ -27,38 +27,28 @@ cartRoute.post("/add-product", async (req, res) => {
       productId: body.productId,
     });
     if (existing) {
-      // Already in DB
-      return res.status(409).json({
-        success: false,
-        message: "Item already in cart. Use PATCH to update quantity.",
+      // already in DB
+      const updatedData = await CartModel.findByIdAndUpdate(
+        existing._id,
+        { $inc: { quantity: 1 } },
+        { new: true },
+      );
+      
+     return res.status(201).json({
+        success: true,
+        data: updatedData,
+        alreadyExist: true,
+        message: "Item already in cart. Quantity increased.",
         cartItemId: existing._id,
       });
     }
     const savedData = await CartModel.create({ ...body, quantity: 1 });
     res.status(201).json({
       success: true,
+      alreadyExist:false,
       message: "An item added to cart successfully",
       data: savedData,
     });
-    // if (findProduct) {
-    //   const quantity = findProduct.quantity + body.quantity;
-    //   const saveData = await CartModel.findOneAndUpdate(id, {
-    //     quantity: quantity,
-    //   });
-    //   res.status(201).json({
-    //     success: true,
-    //     message: "Item already exit in DB. SO, Quantity updated successfully",
-    //     data: saveData,
-    //   });
-    // } else {
-    //   console.log('else')
-    //   const saveData = await CartModel.create(body);
-    //   res.status(201).json({
-    //     success: true,
-    //     message: "An item added to cart successfully",
-    //     data: saveData,
-    //   });
-    // }
   } catch (error) {
     console.log(error);
     res.status(500).json({
