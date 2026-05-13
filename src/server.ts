@@ -5,8 +5,7 @@ import connectDB from "./app/config/database";
 import handleSocket from "./app/socket/socket";
 dotenv.config();
 let server = http.createServer(app);
-const PORT = 5000;
-
+const PORT = process.env.PORT || 5000;
 handleSocket(server);
 
 async function main() {

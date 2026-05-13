@@ -10,17 +10,16 @@ const app = express();
 //Must remove "/" from your production URL
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://foodyvai.vercel.app",
-    ],
+    origin: ["http://localhost:3000", "https://foodyvai.vercel.app"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   }),
-);app.use(express.json());
+);
+app.use(express.json());
 
 app.use("/customer-address", addressRoute);
-app.use('/products', productRoute)
-app.use('/cart',cartRoute)
+app.use("/products", productRoute);
+app.use("/cart", cartRoute);
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello TS Server");
 });
