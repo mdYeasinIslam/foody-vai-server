@@ -7,8 +7,16 @@ import { cartRoute } from "./app/models/cart/cart.controller";
 
 const app = express();
 //middle Ware
-app.use(cors({ origin: "*", credentials: true }));
-app.use(express.json());
+//Must remove "/" from your production URL
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://foodyvai.vercel.app",
+    ],
+    credentials: true,
+  }),
+);app.use(express.json());
 
 app.use("/customer-address", addressRoute);
 app.use('/products', productRoute)
