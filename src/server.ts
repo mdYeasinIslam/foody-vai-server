@@ -1,4 +1,4 @@
-require("dotenv").config()
+require("dotenv").config({ override: false });
 import http from "http";
 import app from "./App";
 import connectDB from "./app/config/database";
