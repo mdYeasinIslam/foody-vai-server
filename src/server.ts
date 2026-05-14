@@ -1,9 +1,8 @@
-import dotenv from "dotenv";
+require("dotenv").config()
 import http from "http";
 import app from "./App";
 import connectDB from "./app/config/database";
 import handleSocket from "./app/socket/socket";
-dotenv.config();
 let server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 handleSocket(server);
