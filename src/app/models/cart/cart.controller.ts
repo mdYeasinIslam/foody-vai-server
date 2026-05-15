@@ -25,7 +25,10 @@ cartRoute.post("/add-product", async (req, res) => {
     const body = zodCheck.parse(req.body);
     const existing = await CartModel.findOne({
       productId: body.productId,
+      "price.weight": body.price.weight,
     });
+    console.log(body);
+    console.log(existing);
     if (existing) {
       // already in DB
       const updatedData = await CartModel.findByIdAndUpdate(
@@ -135,14 +138,14 @@ cartRoute.delete("/", async (req, res) => {
 
 cartRoute.patch("/:id/quantity", async (req, res) => {
   try {
-    const { action, productId } = req.body; // "increment" | "decrement"
+    const { action, productId, price } = req.body;
     const delta = action === "increment" ? 1 : -1;
-
     const updatedData = await CartModel.findOneAndUpdate(
-      { productId },
+      { productId, "price.weight": price.weight },
       { $inc: { quantity: delta } },
       { new: true },
     );
+    console.log(req.body);
     console.log(updatedData)
     if (!updatedData)
       return res
@@ -154,6 +157,7 @@ cartRoute.patch("/:id/quantity", async (req, res) => {
       await CartModel.findOneAndDelete(productId);
       return res.status(200).json({ success: true, data: null, deleted: true,cartItemId:updatedData._id });
     }
+    console.log( req.body)
     res.status(201).json({
       success: true,
       message: "Item updated successfully",
