@@ -145,8 +145,6 @@ cartRoute.patch("/:id/quantity", async (req, res) => {
       { $inc: { quantity: delta } },
       { new: true },
     );
-    console.log(req.body);
-    console.log(updatedData)
     if (!updatedData)
       return res
         .status(404)
@@ -154,11 +152,10 @@ cartRoute.patch("/:id/quantity", async (req, res) => {
 
     // auto-delete if quantity drops to 0
     if (updatedData.quantity <= 0) {
-      await CartModel.findOneAndDelete(productId);
+      await CartModel.findByIdAndDelete(updatedData._id);
       return res.status(200).json({ success: true, data: null, deleted: true,cartItemId:updatedData._id });
     }
-    console.log( req.body)
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "Item updated successfully",
       data: updatedData,
