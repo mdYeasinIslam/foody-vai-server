@@ -28,11 +28,11 @@ addressRoute.post("/", async (req: Request, res: Response) => {
 });
 addressRoute.get('/', async (req: Request, res: Response) => {
   try {
-    const address = await AddressModel.find();
+    const findAll = await AddressModel.find();
   res.status(201).json({
     success: true,
     message: "Address is fetched successfully",
-    data: address,
+    data: findAll,
   });
   } catch (error) {
     console.log(error)
@@ -44,61 +44,40 @@ addressRoute.get('/', async (req: Request, res: Response) => {
   }
   
 })
-// export const foodRoute = express.Router();
-
-// foodRoute.post("/add-food", async (req: Request, res: Response) => {
-//   //approach ----1
-
-//   // const breakFast = new FoodModel({
-//   //     name: 'Ruti',
-//   //     category: "Karbo-Hydred",
-//   //     isAvailable: true,
-//   //     taste:"Mildly nutty and slightly sweet, with a wheat flavor"
-//   // })
-//   // await breakFast.save()
-
-//   // approach---2
-//   const body = req.body;
-//   const foods = await FoodModel.create(body);
-
-//   res.status(201).json({
-//     success: true,
-//     message: "Breakfast food is added",
-//     foods: foods,
-//   });
-// });
-
-// foodRoute.get("/", async (req, res) => {
-//   const foods = await FoodModel.find();
-//   res.status(201).json({
-//     success: true,
-//     message: "Breakfast food is added",
-//     data: foods,
-//   });
-// });
-
-// const app = express();
-// app.use(express.json());
-
-// app.use("/foods", foodRoute);
-// app.use("/users", userRouter);
-
-// const notePadSchema = new Schema({
-//   title: String,
-//   content: String,
-// });
-// const NotePad = model("NotePad", notePadSchema);
-
-// app.post("/create-note", async (req, res) => {
-//   const myNote = new NotePad({
-//     title: "Mongoose Practice",
-//     content: "I am learinng mongoose for the first time",
-//   });
-
-//   await myNote.save();
-//   res.status(201).json({
-//     success: true,
-//     message: "Note is created Succesfully",
-//     data: myNote,
-//   });
-// });
+//delete all address
+addressRoute.delete('/', async (req: Request, res: Response) => {
+try {
+  const findAllAndDelete = await AddressModel.deleteMany();
+  res.status(201).json({
+    success: true,
+    message: "Address is deleted successfully",
+    data: findAllAndDelete,
+  });
+} catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
+}
+})
+//delete single one
+addressRoute.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const findOneAndDelete = await AddressModel.findByIdAndDelete(id);
+    res.status(201).json({
+      success: true,
+      message: "Address is deleted successfully",
+      data: findOneAndDelete,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
+  }
+})
