@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import AddressModel from "./address.model";
 import z from "zod";
 
-
 export const addressRoute = express.Router();
 
 const AddressZod = z.object({
@@ -26,44 +25,65 @@ addressRoute.post("/", async (req: Request, res: Response) => {
     data: address,
   });
 });
-addressRoute.get('/', async (req: Request, res: Response) => {
+addressRoute.get("/", async (req: Request, res: Response) => {
   try {
     const findAll = await AddressModel.find();
-  res.status(201).json({
-    success: true,
-    message: "Address is fetched successfully",
-    data: findAll,
-  });
-  } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong",
-      error: error,
+    res.status(201).json({
+      success: true,
+      message: "Address is fetched successfully",
+      data: findAll,
     });
-  }
-  
-})
-//delete all address
-addressRoute.delete('/', async (req: Request, res: Response) => {
-try {
-  const findAllAndDelete = await AddressModel.deleteMany();
-  res.status(201).json({
-    success: true,
-    message: "Address is deleted successfully",
-    data: findAllAndDelete,
-  });
-} catch (error) {
+  } catch (error) {
     console.log(error);
     res.status(500).json({
       success: false,
       message: "Something went wrong",
       error: error,
     });
-}
-})
+  }
+});
+//update address info
+addressRoute.patch("/:id", async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const body = await req.body
+    const findOneAndUpdate = await AddressModel.findByIdAndUpdate(id, body, {
+      new: true,
+    });
+    res.status(200).json({
+      success: true,
+      message: "Address is updated successfully",
+      data: findOneAndUpdate,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
+  }
+});
+//delete all address
+addressRoute.delete("/", async (req: Request, res: Response) => {
+  try {
+    const findAllAndDelete = await AddressModel.deleteMany();
+    res.status(201).json({
+      success: true,
+      message: "Address is deleted successfully",
+      data: findAllAndDelete,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
+  }
+});
 //delete single one
-addressRoute.delete('/:id', async (req: Request, res: Response) => {
+addressRoute.delete("/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     const findOneAndDelete = await AddressModel.findByIdAndDelete(id);
@@ -80,4 +100,4 @@ addressRoute.delete('/:id', async (req: Request, res: Response) => {
       error: error,
     });
   }
-})
+});
