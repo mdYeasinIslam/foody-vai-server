@@ -27,8 +27,6 @@ cartRoute.post("/add-product", async (req, res) => {
       productId: body.productId,
       "price.weight": body.price.weight,
     });
-    console.log(body);
-    console.log(existing);
     if (existing) {
       // already in DB
       const updatedData = await CartModel.findByIdAndUpdate(
@@ -107,6 +105,7 @@ cartRoute.delete("/:id", async (req, res) => {
       success: true,
       message: "Item deleted successfully",
       data: deleteData,
+      cartItemId: id,
     });
   } catch (error) {
     console.log(error);
