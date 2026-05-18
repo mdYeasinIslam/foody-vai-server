@@ -1,13 +1,57 @@
-import { Request, Response, Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import AuthModel from "./auth.model";
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
+
 //auth router
 export const authRoute = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
+const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_EXPIRES_IN = 60;
+export const verifyToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const authorization = req.headers.authorization;
+    if (!authorization) {
+      return res.status(401).json({
+        success: false,
+        message: "No token provided",
+      });
+    }
+    const token = authorization.split(" ")[1];
+    if (!token) {
+      res.status(401).json({ error: "Access denied : Token didn't find" });
+      return;
+    }
+    const decode = jwt.verify(token, JWT_SECRET);
+    req.user = decode;
+    console.log("decode", decode);
+
+    next();
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      message: "Invalid token",
+    });
+  }
+};
+authRoute.get("/me", verifyToken, async (req, res) => {
+  res.json({
+    success: true,
+    user: req.user,
+  });
+});
 
 authRoute.post("/create-user", async (req: Request, res: Response) => {
   try {
@@ -32,12 +76,12 @@ authRoute.post("/create-user", async (req: Request, res: Response) => {
     });
 
     //generate token
-    // const token = jwt.sign(
-    //   { id: newUser._id, email: newUser.email, role: newUser.role },
-    //   JWT_SECRET,
-    //   { expiresIn: JWT_EXPIRES_IN },
-    // );
-    const token = "hi";
+    const token = jwt.sign(
+      { id: newUser._id, email: newUser.email, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN },
+    );
+    // const token = "hi";
     // return user without password
     const { password: _, ...userWithoutPassword } = newUser.toObject();
 
@@ -79,12 +123,12 @@ authRoute.post("/signIn", async (req: Request, res: Response) => {
     }
 
     // generate token
-    // const token = jwt.sign(
-    //   { id: user._id, email: user.email, role: user.role },
-    //   JWT_SECRET,
-    //   { expiresIn: JWT_EXPIRES_IN },
-    // );
-    const token = "hi";
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN },
+    );
+    // const token = "hi";
     //return user without password
     const { password: _, ...userWithoutPassword } = user.toObject();
 

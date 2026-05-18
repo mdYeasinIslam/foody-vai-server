@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import AddressModel from "./address.model";
 import z from "zod";
+import { verifyToken } from "../auth/auth.controller";
 
 export const addressRoute = express.Router();
 
@@ -15,7 +16,7 @@ const AddressZod = z.object({
   address: z.string(),
 });
 
-addressRoute.post("/", async (req: Request, res: Response) => {
+addressRoute.post("/",verifyToken, async (req: Request, res: Response) => {
   const body = await AddressZod.parseAsync(req.body);
   const address = await AddressModel.create(body);
   console.log(address);
@@ -25,7 +26,7 @@ addressRoute.post("/", async (req: Request, res: Response) => {
     data: address,
   });
 });
-addressRoute.get("/", async (req: Request, res: Response) => {
+addressRoute.get("/", verifyToken, async (req: Request, res: Response) => {
   try {
     const findAll = await AddressModel.find();
     res.status(201).json({
@@ -43,10 +44,10 @@ addressRoute.get("/", async (req: Request, res: Response) => {
   }
 });
 //update address info
-addressRoute.patch("/:id", async (req: Request, res: Response) => {
+addressRoute.patch("/:id", verifyToken, async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const body = await req.body
+    const body = await req.body;
     const findOneAndUpdate = await AddressModel.findByIdAndUpdate(id, body, {
       new: true,
     });
@@ -65,7 +66,7 @@ addressRoute.patch("/:id", async (req: Request, res: Response) => {
   }
 });
 //delete all address
-addressRoute.delete("/", async (req: Request, res: Response) => {
+addressRoute.delete("/", verifyToken, async (req: Request, res: Response) => {
   try {
     const findAllAndDelete = await AddressModel.deleteMany();
     res.status(201).json({
@@ -83,21 +84,25 @@ addressRoute.delete("/", async (req: Request, res: Response) => {
   }
 });
 //delete single one
-addressRoute.delete("/:id", async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const findOneAndDelete = await AddressModel.findByIdAndDelete(id);
-    res.status(201).json({
-      success: true,
-      message: "Address is deleted successfully",
-      data: findOneAndDelete,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong",
-      error: error,
-    });
-  }
-});
+addressRoute.delete(
+  "/:id",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const findOneAndDelete = await AddressModel.findByIdAndDelete(id);
+      res.status(201).json({
+        success: true,
+        message: "Address is deleted successfully",
+        data: findOneAndDelete,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        success: false,
+        message: "Something went wrong",
+        error: error,
+      });
+    }
+  },
+);
