@@ -1,11 +1,12 @@
 import express from "express";
-import z, { success } from "zod";
+import z from "zod";
 import CartModel from "./cart.model";
 import mongoose from "mongoose";
 export const cartRoute = express.Router();
 
 const zodCheck = z.object({
   productId: z.string(),
+  userId: z.string() || null,
   name: z.string(),
   description: z.string().nullable(),
   price: z.object({
@@ -16,6 +17,7 @@ const zodCheck = z.object({
     weightName: z.string(),
   }),
   category: z.string(),
+  subCategory: z.string().nullable(),
   quantity: z.number(),
   img: z.string(),
 });
@@ -27,11 +29,12 @@ cartRoute.post("/add-product", async (req, res) => {
       productId: body.productId,
       "price.weight": body.price.weight,
     });
+    console.log(existing);
     if (existing) {
       // already in DB
       const updatedData = await CartModel.findByIdAndUpdate(
         existing._id,
-        { $inc: { quantity: 1 } },
+        { $inc: { quantity: body.quantity || 1 } },
         { new: true },
       );
 
@@ -152,7 +155,14 @@ cartRoute.patch("/:id/quantity", async (req, res) => {
     // auto-delete if quantity drops to 0
     if (updatedData.quantity <= 0) {
       await CartModel.findByIdAndDelete(updatedData._id);
-      return res.status(200).json({ success: true, data: null, deleted: true,cartItemId:updatedData._id });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          data: null,
+          deleted: true,
+          cartItemId: updatedData._id,
+        });
     }
     res.status(200).json({
       success: true,

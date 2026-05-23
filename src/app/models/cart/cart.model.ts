@@ -31,6 +31,11 @@ const cartSchema = new Schema(
       required: true,
       trim: true,
     },
+    userId: {
+      type: String || null,
+      required: true,
+      trim: true,
+    },
     name: {
       type: String,
       required: true,
