@@ -15,7 +15,7 @@ declare global {
 export const authRoute = Router();
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
-const JWT_EXPIRES_IN = 60 * 5;
+const JWT_EXPIRES_IN = 60 * 30;
 export const verifyToken = (
   req: Request,
   res: Response,
