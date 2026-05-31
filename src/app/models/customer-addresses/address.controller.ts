@@ -14,17 +14,30 @@ const AddressZod = z.object({
   phone: z.string(),
   addressName: z.string(),
   address: z.string(),
+  isDefault:z.boolean().optional()
 });
 
-addressRoute.post("/",verifyToken, async (req: Request, res: Response) => {
-  const body = await AddressZod.parseAsync(req.body);
-  const address = await AddressModel.create(body);
-  console.log(address);
-  res.status(201).json({
-    success: true,
-    message: "Address is added successfully",
-    data: address,
-  });
+addressRoute.post("/", verifyToken, async (req: Request, res: Response) => {
+  try {
+    const body = await AddressZod.parseAsync(req.body);
+    const count = await AddressModel.countDocuments();
+    const address = await AddressModel.create({
+      ...body,
+      isDefault: count === 0,
+    });
+    res.status(201).json({
+      success: true,
+      message: "Address is added successfully",
+      data: address,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error,
+    });
+  }
 });
 addressRoute.get("/", verifyToken, async (req: Request, res: Response) => {
   try {

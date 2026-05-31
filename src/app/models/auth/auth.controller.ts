@@ -36,7 +36,7 @@ export const verifyToken = (
     }
     const decode = jwt.verify(token, JWT_SECRET);
     req.user = decode;
-    console.log("decode", decode);
+    // console.log("decode", decode);
 
     next();
   } catch (error) {

@@ -18,18 +18,18 @@ const addressSchema = new Schema({
   },
   areaName: {
     type: String,
-    trim:true
+    trim: true,
   },
   contactName: {
     type: String,
     required: true,
-    trim:true
+    trim: true,
   },
   phone: {
     type: String,
     required: true,
-    minlength: [10, 'Phone number should be a valid Bangladeshi phone number'],
-    trim:true
+    minlength: [10, "Phone number should be a valid Bangladeshi phone number"],
+    trim: true,
   },
   addressName: {
     type: String,
@@ -39,6 +39,10 @@ const addressSchema = new Schema({
   address: {
     type: String,
     required: true,
+  },
+  isDefault: {
+    type: Boolean,
+    default: false,
   },
 });
 const AddressModel = model("Address", addressSchema);
