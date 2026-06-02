@@ -56,6 +56,38 @@ addressRoute.get("/", verifyToken, async (req: Request, res: Response) => {
     });
   }
 });
+//update (set as default)
+addressRoute.patch(
+  "/:id/set-default",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const id = req.params.id;
+      const { isDefault } = req.body;
+
+      if (isDefault) {
+        await AddressModel.updateMany({}, { isDefault: false });
+      }
+      const updatedAddress = await AddressModel.findByIdAndUpdate(
+        id,
+        { isDefault },
+        { new: true },
+      );
+      res.status(200).json({
+        success: true,
+        message: "Address default status updated successfully",
+        data: updatedAddress,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        success: false,
+        message: "Something went wrong",
+        error: error,
+      });
+    }
+  },
+);
 //update address info
 addressRoute.patch("/:id", verifyToken, async (req: Request, res: Response) => {
   try {
