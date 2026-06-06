@@ -29,7 +29,6 @@ cartRoute.post("/add-product", async (req, res) => {
       productId: body.productId,
       "price.weight": body.price.weight,
     });
-    console.log(existing);
     if (existing) {
       // already in DB
       const updatedData = await CartModel.findByIdAndUpdate(
@@ -83,9 +82,7 @@ cartRoute.get("/", async (req, res) => {
 cartRoute.get("/:id", async (req, res) => {
   try {
     const id = req.params.id.trim();
-    console.log(mongoose.Types.ObjectId.isValid(id));
     const cartProduct = await CartModel.findById(id);
-    console.log(cartProduct);
     res.status(200).json({
       success: true,
       message: "Cart data are fetched successfully",

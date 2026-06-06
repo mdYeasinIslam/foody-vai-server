@@ -136,17 +136,19 @@ addressRoute.delete(
     try {
       const id = req.params.id;
       const address = await AddressModel.findById(id);
-      
+
       if (address?.isDefault) {
-        const findOneAndDelete = await AddressModel.findByIdAndDelete(id);
+        await AddressModel.findByIdAndDelete(id);
         const firstAddress = await AddressModel.findOne();
         if (firstAddress) {
-          await AddressModel.findByIdAndUpdate(firstAddress._id, { isDefault: true });
+          await AddressModel.findByIdAndUpdate(firstAddress._id, {
+            isDefault: true,
+          });
         }
       } else {
         await AddressModel.findByIdAndDelete(id);
       }
-      
+
       res.status(200).json({
         success: true,
         message: "Address is deleted successfully",
