@@ -11,27 +11,27 @@ const orderHandler = (io: any, socket: any) => {
   //place order
   socket.on("placeOrder", async (data: any, callback: any) => {
     try {
-      console.log("place order id", socket.id);
-      const validate = validator(data);
+      console.log("place order id", data.items);
+      const validate = validator(data?.items);
 
       if (!validate.isValid) {
         callback({ success: false, message: validate.message });
       }
-      const total = calculateTotal(data?.items);
+      // const total = calculateTotal(data?.items);
       const orderId = generateId();
-      const orderData = createOrderDocument(data, orderId, total);
+      const orderData = createOrderDocument(data, orderId, data.totalAmount);
+      console.log(orderData)
+      // const newOrder = await Order.create(orderData);
 
-      const newOrder = await Order.create(orderData);
+      // socket.join(`order-${orderId}`);
+      // socket.join("customers");
 
-      socket.join(`order-${orderId}`);
-      socket.join("customers");
-
-      io.to("admin").emit("newOrder", newOrder);
+      // io.to("admin").emit("newOrder", newOrder);
 
       callback({
         success: true,
         message: "Order placed successfully",
-        orderData: newOrder,
+        // orderData: newOrder,
       });
     } catch (error) {
       console.log(error);
@@ -340,13 +340,13 @@ const orderHandler = (io: any, socket: any) => {
   });
 
   //get live stats
-  socket.on('getLiveStats', async (data: any, callback: any) => {
+  socket.on("getLiveStats", async (data: any, callback: any) => {
     try {
       if (!socket.isAdmin) {
         return callback({
           success: false,
-          message: 'Unauthorized',
-        })
+          message: "Unauthorized",
+        });
       }
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -381,29 +381,28 @@ const orderHandler = (io: any, socket: any) => {
           status: "out_for_delivery",
           createdAt: { $gte: today },
         }),
-
       };
       callback({
         success: true,
-        message: 'Stats fetched successfully',
-        stats
-      })
+        message: "Stats fetched successfully",
+        stats,
+      });
     } catch (error) {
-      console.error(error)
+      console.error(error);
       callback({
         success: false,
-        message: 'Something went wrong',
-        error: error
-      })
+        message: "Something went wrong",
+        error: error,
+      });
     }
-  })
+  });
 
   //disconnect
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     console.log(`socket disconnected ${socket.id}`);
     if (socket.isAdmin) {
-      socket.to('admin').emit('adminDisconnected',{adminId:socket.id})
+      socket.to("admin").emit("adminDisconnected", { adminId: socket.id });
     }
-  })
+  });
 };
 export default orderHandler;
