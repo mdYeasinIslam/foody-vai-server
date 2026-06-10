@@ -37,3 +37,25 @@ export interface OrderInfo {
   };
   items: Product[];
 }
+export interface ITotals {
+  subTotal: number;
+  tax: number;
+  deliveryFee: number;
+  totalAmount: number;
+}
+export interface IOrderCreate {
+  userId: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress: string;
+  totals: ITotals;
+  paymentMethod: string;
+  deliveryDate: string;
+  specialNote: string;
+  // status: "pending";
+  items: {
+    id: string;
+    productId: string;
+    userId: string | null;
+  }[];
+}

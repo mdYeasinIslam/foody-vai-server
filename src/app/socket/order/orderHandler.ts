@@ -17,11 +17,15 @@ const orderHandler = (io: any, socket: any) => {
       if (!validate.isValid) {
         callback({ success: false, message: validate.message });
       }
-      const totals = calculateTotal(data?.data?.items);
+      // const totals = calculateTotal(data?.data?.items);
       const orderId = generateId();
-      const orderData = createOrderDocument(data?.data, orderId, totals);
+      const orderData = createOrderDocument(
+        data?.data,
+        orderId,
+        data?.data?.totals,
+      );
       const newOrder = await Order.create(orderData);
-      
+
       // console.log("order id", orderData);
       socket.join(`order-${orderId}`);
       socket.join("customers");

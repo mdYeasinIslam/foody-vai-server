@@ -1,4 +1,4 @@
-import { OrderInfo, Product } from "./interface";
+import { IOrderCreate, ITotals, OrderInfo, Product } from "./interface";
 
 export const validator = (data: any) => {
   if (!Array.isArray(data?.items)) {
@@ -28,7 +28,7 @@ export const calculateTotal = (items: Product[]) => {
     (acc, item) => acc + item.price.price * item.quantity,
     0,
   );
-  const tax = subTotal * 0.1;
+  const tax = (subTotal * 0.1).toFixed(2);
   const delivery = 50;
   const total = subTotal + tax + delivery;
 
@@ -42,21 +42,21 @@ export const calculateTotal = (items: Product[]) => {
 
 // create order document
 export const createOrderDocument = (
-  orderData: OrderInfo,
+  orderData: IOrderCreate,
   orderId: string,
-  totals: any,
+  totals: ITotals,
 ) => {
   return {
     customerName: orderData?.customerName?.trim(),
     orderId: orderId,
-    customerPhone: orderData.defaultAddress.phone?.trim(),
-    customerAddress: orderData.defaultAddress.address?.trim(),
-    items: orderData.items,
+    customerPhone: orderData?.customerPhone?.trim(),
+    customerAddress: orderData.customerAddress?.trim(),
+    items: orderData.items, //need to update
     subtotal: totals.subTotal,
     tax: totals.tax,
-    deliveryFee: totals.delivery,
+    deliveryFee: totals.deliveryFee,
     totalAmount: totals.totalAmount,
-    specialNotes: orderData.note || "",
+    specialNote: orderData.specialNote || "",
     paymentMethod: orderData.paymentMethod || "cod",
     paymentStatus: "pending",
     status: "pending",
