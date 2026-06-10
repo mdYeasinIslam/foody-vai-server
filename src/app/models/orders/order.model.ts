@@ -17,6 +17,11 @@ const orderSchema = new mongoose.Schema(
       required: [true, "Customer address is required"],
       trim: true,
     },
+    orderId: {
+      type: String,
+      required: [true, "Order ID is required"],
+      unique: true,
+    },
     items: {
       type: Array,
       required: true,
@@ -43,7 +48,7 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["cash", "card", "online"],
+      enum: ["cod", "card", "online"],
       default: "cash",
     },
     paymentStatus: {

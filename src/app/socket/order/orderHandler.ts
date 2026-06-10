@@ -11,27 +11,27 @@ const orderHandler = (io: any, socket: any) => {
   //place order
   socket.on("placeOrder", async (data: any, callback: any) => {
     try {
-      console.log("place order id", data.items);
-      const validate = validator(data?.items);
+      // console.log("place order id", data?.data);
+      const validate = validator(data?.data);
 
       if (!validate.isValid) {
         callback({ success: false, message: validate.message });
       }
-      // const total = calculateTotal(data?.items);
+      const totals = calculateTotal(data?.data?.items);
       const orderId = generateId();
-      const orderData = createOrderDocument(data, orderId, data.totalAmount);
-      console.log(orderData)
-      // const newOrder = await Order.create(orderData);
+      const orderData = createOrderDocument(data?.data, orderId, totals);
+      const newOrder = await Order.create(orderData);
+      
+      // console.log("order id", orderData);
+      socket.join(`order-${orderId}`);
+      socket.join("customers");
 
-      // socket.join(`order-${orderId}`);
-      // socket.join("customers");
-
-      // io.to("admin").emit("newOrder", newOrder);
+      io.to("admin").emit("newOrder", newOrder);
 
       callback({
         success: true,
         message: "Order placed successfully",
-        // orderData: newOrder,
+        orderData: newOrder,
       });
     } catch (error) {
       console.log(error);

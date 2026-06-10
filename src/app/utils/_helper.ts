@@ -1,5 +1,7 @@
+import { OrderInfo, Product } from "./interface";
+
 export const validator = (data: any) => {
-  if (!Array.isArray(data.items)) {
+  if (!Array.isArray(data?.items)) {
     return { isValid: false, message: "Items must be an array" };
   }
 
@@ -21,12 +23,12 @@ export const generateId = () => {
 };
 
 //calculate total amount
-export const calculateTotal = (items: any[]) => {
-  const subTotal = items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+export const calculateTotal = (items: Product[]) => {
+  const subTotal = items?.reduce(
+    (acc, item) => acc + item.price.price * item.quantity,
     0,
   );
-  const tax = subTotal * 0.10;
+  const tax = subTotal * 0.1;
   const delivery = 50;
   const total = subTotal + tax + delivery;
 
@@ -39,32 +41,43 @@ export const calculateTotal = (items: any[]) => {
 };
 
 // create order document
-export const createOrderDocument = (orderData: any, orderId: string, totals: any) => {
+export const createOrderDocument = (
+  orderData: OrderInfo,
+  orderId: string,
+  totals: any,
+) => {
   return {
-    customerPhone: orderData.customerPhone?.trim(),
-    customerAddress: orderData.customerAddress?.trim(),
+    customerName: orderData?.customerName?.trim(),
+    orderId: orderId,
+    customerPhone: orderData.defaultAddress.phone?.trim(),
+    customerAddress: orderData.defaultAddress.address?.trim(),
     items: orderData.items,
     subtotal: totals.subTotal,
     tax: totals.tax,
     deliveryFee: totals.delivery,
     totalAmount: totals.totalAmount,
-    specialNotes: orderData.specialNotes || '',
-    paymentMethod: orderData.paymentMethod || 'cash',
-    paymentStatus: 'pending',
-    status: 'pending',
-    statusHistory: [{
-      status: 'pending',
-      timestamp: new Date(),
-      by: 'customer',
-      note: 'Order placed'
-    }],
+    specialNotes: orderData.note || "",
+    paymentMethod: orderData.paymentMethod || "cod",
+    paymentStatus: "pending",
+    status: "pending",
+    statusHistory: [
+      {
+        status: "pending",
+        timestamp: new Date(),
+        by: "customer",
+        note: "Order placed",
+      },
+    ],
     estimatedTime: null,
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   };
 };
 
-export const isValidStatusTransition = (currentStatus: string, newStatus: string) => {
+export const isValidStatusTransition = (
+  currentStatus: string,
+  newStatus: string,
+) => {
   const statusTransitions: { [key: string]: string[] } = {
     pending: ["confirmed", "cancelled"],
     confirmed: ["preparing", "cancelled"],
@@ -76,4 +89,4 @@ export const isValidStatusTransition = (currentStatus: string, newStatus: string
   };
 
   return statusTransitions[currentStatus]?.includes(newStatus) || false;
-}
+};
