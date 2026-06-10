@@ -1,6 +1,5 @@
 import Order from "../../models/orders/order.model";
 import {
-  calculateTotal,
   createOrderDocument,
   generateId,
   isValidStatusTransition,

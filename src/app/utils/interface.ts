@@ -54,7 +54,7 @@ export interface IOrderCreate {
   specialNote: string;
   // status: "pending";
   items: {
-    id: string;
+    id?: string;
     productId: string;
     userId: string | null;
   }[];

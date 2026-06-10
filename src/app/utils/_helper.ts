@@ -28,7 +28,7 @@ export const calculateTotal = (items: Product[]) => {
     (acc, item) => acc + item.price.price * item.quantity,
     0,
   );
-  const tax = (subTotal * 0.1).toFixed(2);
+  const tax = parseFloat((subTotal * 0.1).toFixed(2));
   const delivery = 50;
   const total = subTotal + tax + delivery;
 
@@ -64,8 +64,8 @@ export const createOrderDocument = (
       {
         status: "pending",
         timestamp: new Date(),
-        by: "customer",
-        note: "Order placed",
+        by: orderData?.customerName ||"customer",
+        note: orderData.specialNote,
       },
     ],
     estimatedTime: null,
