@@ -1,4 +1,4 @@
-import { IOrderCreate, ITotals, OrderInfo, Product } from "./interface";
+import { IOrderCreate, ITotals, OrderInfo, IProduct } from "./interface";
 
 export const validator = (data: any) => {
   if (!Array.isArray(data?.items)) {
@@ -23,7 +23,7 @@ export const generateId = () => {
 };
 
 //calculate total amount
-export const calculateTotal = (items: Product[]) => {
+export const calculateTotal = (items: IProduct[]) => {
   const subTotal = items?.reduce(
     (acc, item) => acc + item.price.price * item.quantity,
     0,
@@ -64,7 +64,7 @@ export const createOrderDocument = (
       {
         status: "pending",
         timestamp: new Date(),
-        by: orderData?.customerName ||"customer",
+        by: orderData?.customerName || "customer",
         note: orderData.specialNote,
       },
     ],

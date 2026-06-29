@@ -1,4 +1,4 @@
-export interface Product {
+export interface IProduct {
   _id: string;
   productId: string;
   userId: string;
@@ -35,7 +35,7 @@ export interface OrderInfo {
     isDefault: boolean;
     __v: number;
   };
-  items: Product[];
+  items: IProduct[];
 }
 export interface ITotals {
   subTotal: number;
@@ -53,9 +53,5 @@ export interface IOrderCreate {
   deliveryDate: string;
   specialNote: string;
   // status: "pending";
-  items: {
-    id?: string;
-    productId: string;
-    userId: string | null;
-  }[];
+  items: IProduct[];
 }

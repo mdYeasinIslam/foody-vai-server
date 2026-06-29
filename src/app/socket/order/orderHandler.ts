@@ -10,13 +10,11 @@ const orderHandler = (io: any, socket: any) => {
   //place order
   socket.on("placeOrder", async (data: any, callback: any) => {
     try {
-      // console.log("place order id", data?.data);
       const validate = validator(data?.data);
 
       if (!validate.isValid) {
         callback({ success: false, message: validate.message });
       }
-      // const totals = calculateTotal(data?.data?.items);
       const orderId = generateId();
       const orderData = createOrderDocument(
         data?.data,
@@ -24,8 +22,6 @@ const orderHandler = (io: any, socket: any) => {
         data?.data?.totals,
       );
       const newOrder = await Order.create(orderData);
-
-      // console.log("order id", orderData);
       socket.join(`order-${orderId}`);
       socket.join("customers");
 
@@ -34,7 +30,7 @@ const orderHandler = (io: any, socket: any) => {
       callback({
         success: true,
         message: "Order placed successfully",
-        orderData: newOrder,
+        data: newOrder,
       });
     } catch (error) {
       console.log(error);
@@ -50,6 +46,7 @@ const orderHandler = (io: any, socket: any) => {
   socket.on("trackOder", async (data: any, callback: any) => {
     try {
       const order = await Order.findOne({ orderId: data?.orderId });
+      console.log("from server", data, order);
       if (!order) {
         return callback({ success: false, message: "Order not found" });
       }
