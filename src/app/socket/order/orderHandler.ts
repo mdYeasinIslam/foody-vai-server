@@ -10,17 +10,18 @@ const orderHandler = (io: any, socket: any) => {
   //place order
   socket.on("placeOrder", async (data: any, callback: any) => {
     try {
-      const validate = validator(data?.data);
-
+      const validate = validator(data);
+     
       if (!validate.isValid) {
         callback({ success: false, message: validate.message });
       }
       const orderId = generateId();
       const orderData = createOrderDocument(
-        data?.data,
+        data,
         orderId,
-        data?.data?.totals,
+        data?.totals,
       );
+      console.log(orderData);
       const newOrder = await Order.create(orderData);
       socket.join(`order-${orderId}`);
       socket.join("customers");
@@ -67,7 +68,7 @@ const orderHandler = (io: any, socket: any) => {
   socket.on("cancelOrder", async (data: any, callback: any) => {
     try {
       const order = await Order.findOne({ orderId: data?.orderId });
-      console.log("from server", data, order);
+      // console.log("from server", data, order);
       if (!order) {
         return callback({ success: false, message: "Order not found" });
       }
@@ -113,7 +114,7 @@ const orderHandler = (io: any, socket: any) => {
   socket.on("deleteOrder", async (data: any, callback: any) => {
     try {
       const order = await Order.findOne({ orderId: data?.orderId });
-      console.log("from server", data, order);
+      console.log("from server", data, order?.id);
       if (!order) {
         return callback({ success: false, message: "Order not found" });
       }
@@ -124,7 +125,7 @@ const orderHandler = (io: any, socket: any) => {
         });
       }
 
-      await Order.deleteOne({ orderId: data?.orderId });
+      await Order.findByIdAndDelete(order.id);
       io.to(`order-${data?.orderId}`).emit("orderDeleted", {
         orderId: data.orderId,
       });
@@ -214,6 +215,7 @@ const orderHandler = (io: any, socket: any) => {
   socket.on("updateOrderStatus", async (data: any, callback: any) => {
     try {
       const order = await Order.findOne({ orderId: data?.orderId });
+
       if (!order) {
         return callback({ success: false, message: "Order not found" });
       }
@@ -246,7 +248,7 @@ const orderHandler = (io: any, socket: any) => {
         updateOrder,
         status: data.newStatus,
       });
-      socket.io("admin").emit("orderStatusChanged", {
+      io.to("admin").emit("orderStatusChanged", {
         orderId: data.orderId,
         status: data.newStatus,
       });

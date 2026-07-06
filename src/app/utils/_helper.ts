@@ -50,14 +50,14 @@ export const createOrderDocument = (
     customerName: orderData?.customerName?.trim(),
     orderId: orderId,
     customerPhone: orderData?.customerPhone?.trim(),
-    customerAddress: orderData.customerAddress?.trim(),
-    items: orderData.items, //need to update
-    subtotal: totals.subTotal,
-    tax: totals.tax,
-    deliveryFee: totals.deliveryFee,
-    totalAmount: totals.totalAmount,
-    specialNote: orderData.specialNote || "",
-    paymentMethod: orderData.paymentMethod || "cod",
+    customerAddress: orderData?.customerAddress?.trim(),
+    items: orderData?.items, //need to update
+    subtotal: totals?.subTotal,
+    tax: totals?.tax,
+    deliveryFee: totals?.deliveryFee,
+    totalAmount: totals?.totalAmount,
+    specialNote: orderData?.specialNote || "",
+    paymentMethod: orderData?.paymentMethod || "cod",
     paymentStatus: "pending",
     status: "pending",
     statusHistory: [
@@ -65,7 +65,7 @@ export const createOrderDocument = (
         status: "pending",
         timestamp: new Date(),
         by: orderData?.customerName || "customer",
-        note: orderData.specialNote,
+        note: orderData?.specialNote,
       },
     ],
     estimatedTime: null,
@@ -80,13 +80,13 @@ export const isValidStatusTransition = (
 ) => {
   const statusTransitions: { [key: string]: string[] } = {
     pending: ["confirmed", "cancelled"],
-    confirmed: ["preparing", "cancelled"],
-    preparing: ["ready", "cancelled"],
-    ready: ["out_for_delivery", "cancelled"],
-    out_for_delivery: ["delivered"],
+    confirmed: ["delivered", "cancelled"],
+    // preparing: ["ready", "cancelled"],
+    // ready: ["out_for_delivery", "cancelled"],
+    // out_for_delivery: ["delivered"],
     delivered: [],
-    cancelled: [],
+    cancelled: ["pending"],
   };
-
+  console.log(statusTransitions[currentStatus]);
   return statusTransitions[currentStatus]?.includes(newStatus) || false;
 };
