@@ -67,6 +67,7 @@ const orderHandler = (io: any, socket: any) => {
   socket.on("cancelOrder", async (data: any, callback: any) => {
     try {
       const order = await Order.findOne({ orderId: data?.orderId });
+      console.log("from server", data, order);
       if (!order) {
         return callback({ success: false, message: "Order not found" });
       }
@@ -108,14 +109,43 @@ const orderHandler = (io: any, socket: any) => {
       });
     }
   });
+  //delete single order
+  socket.on("deleteOrder", async (data: any, callback: any) => {
+    try {
+      const order = await Order.findOne({ orderId: data?.orderId });
+      console.log("from server", data, order);
+      if (!order) {
+        return callback({ success: false, message: "Order not found" });
+      }
+      if (!["pending", "confirmed"]?.includes(order?.status || "")) {
+        return callback({
+          success: false,
+          message: "Order cannot be deleted",
+        });
+      }
 
+      await Order.deleteOne({ orderId: data?.orderId });
+      io.to(`order-${data?.orderId}`).emit("orderDeleted", {
+        orderId: data.orderId,
+      });
+      io.to("admin").emit("orderDeleted", { orderId: data.orderId });
+      callback({ success: true, message: "Order deleted successfully" });
+    } catch (error) {
+      console.log(error);
+      callback({
+        success: false,
+        message: "Something went wrong",
+        error: error,
+      });
+    }
+  });
   //get my order
   socket.on("getMyOrder", async (data: any, callback: any) => {
     try {
-      const orders = await Order.find({ customerPhone: data?.customerPhone })
+      const orders = await Order.find({ customerPhone: data.customerPhone })
         .sort({ createdAt: -1 })
         .limit(20);
-
+      console.log("from server", orders);
       if (orders.length <= 0) {
         callback({ success: false, message: "Order not found" });
       }
@@ -156,9 +186,9 @@ const orderHandler = (io: any, socket: any) => {
   //get all order for admin
   socket.on("getAllOrders", async (data: any, callback: any) => {
     try {
-      if (!socket.isAdmin) {
-        return callback({ success: false, message: "Unauthorized" });
-      }
+      // if (!socket.isAdmin) {
+      //   return callback({ success: false, message: "Unauthorized" });
+      // }
       const filter = data?.status ? { status: data?.status } : {};
       const getAllOrders = await Order.find(filter)
         .sort({ createdAt: -1 })
@@ -166,13 +196,15 @@ const orderHandler = (io: any, socket: any) => {
       callback({
         success: true,
         message: "Orders fetched successfully",
-        orders: getAllOrders,
+        data: getAllOrders,
+        error: null,
       });
     } catch (error) {
       console.log(error);
       callback({
         success: false,
         message: "Something went wrong",
+        data: null,
         error: error,
       });
     }
