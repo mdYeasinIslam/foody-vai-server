@@ -5,6 +5,7 @@ import { addressRoute } from "./app/models/customer-addresses/address.controller
 import { productRoute } from "./app/models/products/product.controller";
 import { cartRoute } from "./app/models/cart/cart.controller";
 import { authRoute } from "./app/models/auth/auth.controller";
+import { productStateRoute } from "./app/models/productOrder-stats/productStats.controller";
 
 const app = express();
 //middle Ware
@@ -18,6 +19,7 @@ app.use(
 );
 app.use(express.json());
 
+app.use("/product-stats", productStateRoute);
 app.use("/customer-address", addressRoute);
 app.use("/products", productRoute);
 app.use("/cart", cartRoute);

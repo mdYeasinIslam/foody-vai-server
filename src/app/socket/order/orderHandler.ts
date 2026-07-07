@@ -1,4 +1,5 @@
 import Order from "../../models/orders/order.model";
+import ProductOrderStats from "../../models/productOrder-stats/productStats.model";
 import {
   createOrderDocument,
   generateId,
@@ -11,18 +12,39 @@ const orderHandler = (io: any, socket: any) => {
   socket.on("placeOrder", async (data: any, callback: any) => {
     try {
       const validate = validator(data);
-     
+
       if (!validate.isValid) {
         callback({ success: false, message: validate.message });
       }
       const orderId = generateId();
-      const orderData = createOrderDocument(
-        data,
-        orderId,
-        data?.totals,
-      );
+      const orderData = createOrderDocument(data, orderId, data?.totals);
       console.log(orderData);
       const newOrder = await Order.create(orderData);
+      for (const item of orderData.items) {
+        await ProductOrderStats.findOneAndUpdate(
+          {
+            productId: item._id,
+          },
+          {
+            $inc: {
+              totalOrderedQuantity: item.quantity,
+              totalOrders: 1,
+            },
+
+            $push: {
+              orderHistory: {
+                orderId,
+                quantity: item.quantity,
+                orderedAt: new Date(),
+              },
+            },
+          },
+          {
+            upsert: true,
+            new: true,
+          },
+        );
+      }
       socket.join(`order-${orderId}`);
       socket.join("customers");
 
