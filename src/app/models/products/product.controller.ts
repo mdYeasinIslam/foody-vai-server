@@ -85,8 +85,7 @@ productRoute.get("/:id", async (req: Request, res: Response) => {
 // UPDATE PRODUCT
 productRoute.patch("/:id", async (req: Request, res: Response) => {
   try {
-    const body = zodCheck.partial().parse(req.body);
-
+    const body = req.body
     const product = await ProductModel.findByIdAndUpdate(
       req.params.id,
       body,
