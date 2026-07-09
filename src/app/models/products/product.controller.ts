@@ -22,7 +22,7 @@ productRoute.post("/add-product", async (req: Request, res: Response) => {
   try {
     const body = zodCheck.parse(req.body);
     const saveData = await ProductModel.create(body);
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "",
       data: saveData,
@@ -52,6 +52,96 @@ productRoute.get("/", async (req: Request, res: Response) => {
       success: false,
       message: "Something went wrong",
       error: error,
+    });
+  }
+});
+// GET SINGLE PRODUCT
+productRoute.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const product = await ProductModel.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product fetched successfully",
+      data: product,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error,
+    });
+  }
+});
+// UPDATE PRODUCT
+productRoute.patch("/:id", async (req: Request, res: Response) => {
+  try {
+    const body = zodCheck.partial().parse(req.body);
+
+    const product = await ProductModel.findByIdAndUpdate(
+      req.params.id,
+      body,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      data: product,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error,
+    });
+  }
+});
+// DELETE PRODUCT
+productRoute.delete("/:id", async (req: Request, res: Response) => {
+  try {
+    const product = await ProductModel.findByIdAndDelete(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+      data: product,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error,
     });
   }
 });
