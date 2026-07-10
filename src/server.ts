@@ -5,7 +5,7 @@ import connectDB from "./app/config/database";
 import handleSocket from "./app/socket/socket";
 
 let server = http.createServer(app);
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 handleSocket(server);
 
 async function main() {
