@@ -6,6 +6,7 @@ import { productRoute } from "./app/models/products/product.controller";
 import { cartRoute } from "./app/models/cart/cart.controller";
 import { authRoute } from "./app/models/auth/auth.controller";
 import { productStateRoute } from "./app/models/productOrder-stats/productStats.controller";
+import { categoryRouter } from "./app/models/Categories/category.controller";
 
 const app = express();
 //middle Ware
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use("/product-stats", productStateRoute);
 app.use("/customer-address", addressRoute);
 app.use("/products", productRoute);
+app.use('/category',categoryRouter);
 app.use("/cart", cartRoute);
 app.use("/auth", authRoute);
 app.get("/", (req: Request, res: Response) => {

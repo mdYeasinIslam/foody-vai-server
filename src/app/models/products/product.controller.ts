@@ -19,7 +19,7 @@ export const productRoute = express.Router();
 //   img: z.string(),
 // });
 const productSchema = z.object({
-  _id: z.string().nullable().optional(),
+  // _id: z.string().nullable().optional(),
   name: z.string(),
   description: z.string().nullable(),
   img: z.string(),
