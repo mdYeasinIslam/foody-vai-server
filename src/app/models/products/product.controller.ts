@@ -4,23 +4,37 @@ import ProductModel from "./product.model";
 
 export const productRoute = express.Router();
 
-const zodCheck = z.object({
+// const zodCheck = z.object({
+//   name: z.string(),
+//   description: z.string().nullable(),
+//   prices: z.array(z.object({
+//     weight: z.number(),
+//     price: z.number(),
+//     originalPrice: z.number(),
+//     weightName:z.string(),
+//     currency:z.string()
+//   })),
+//   category: z.string(),
+//   subCategory: z.string().nullable(),
+//   img: z.string(),
+// });
+const productSchema = z.object({
+  _id: z.string().nullable().optional(),
   name: z.string(),
   description: z.string().nullable(),
-  prices: z.array(z.object({
-    weight: z.number(),
-    price: z.number(),
-    originalPrice: z.number(),
-    weightName:z.string(),
-    currency:z.string()
-  })),
-  category: z.string(),
-  subCategory: z.string().nullable(),
   img: z.string(),
+  sellUnit: z.string(),
+  price: z.number(),
+  salePrice: z.number(),
+  averageRating: z.number(),
+  category: z.string(),
+  quantity: z.number(),
+  slug: z.string(),
 });
+
 productRoute.post("/add-product", async (req: Request, res: Response) => {
   try {
-    const body = zodCheck.parse(req.body);
+    const body = productSchema.parse(req.body);
     const saveData = await ProductModel.create(body);
     res.status(200).json({
       success: true,
@@ -85,15 +99,11 @@ productRoute.get("/:id", async (req: Request, res: Response) => {
 // UPDATE PRODUCT
 productRoute.patch("/:id", async (req: Request, res: Response) => {
   try {
-    const body = req.body
-    const product = await ProductModel.findByIdAndUpdate(
-      req.params.id,
-      body,
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
+    const body = productSchema.partial().parse(req.body);
+    const product = await ProductModel.findByIdAndUpdate(req.params.id, body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!product) {
       return res.status(404).json({
